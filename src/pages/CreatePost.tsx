@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -21,7 +21,7 @@ const CreatePost = () => {
   const [loading, setLoading] = useState(false);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [categoryId, setCategoryId] = useState("");
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
 
   useEffect(() => {
@@ -71,22 +71,42 @@ const CreatePost = () => {
       }
     }
 
-    if (!categoryId) {
-      toast.error("Please select a category");
+    if (selectedCategories.length === 0) {
+      toast.error("Please select at least one category");
       return;
     }
 
     setLoading(true);
 
-    const { error } = await supabase.from("posts").insert({
-      title: title.trim(),
-      content: content.trim(),
-      author_id: user.id,
-      category_id: categoryId,
-    });
+    // First, create the post
+    const { data: postData, error: postError } = await supabase
+      .from("posts")
+      .insert({
+        title: title.trim(),
+        content: content.trim(),
+        author_id: user.id,
+      })
+      .select()
+      .single();
 
-    if (error) {
+    if (postError) {
       toast.error("Error creating post");
+      setLoading(false);
+      return;
+    }
+
+    // Then, insert the post-category relationships
+    const postCategories = selectedCategories.map((categoryId) => ({
+      post_id: postData.id,
+      category_id: categoryId,
+    }));
+
+    const { error: categoriesError } = await supabase
+      .from("post_categories")
+      .insert(postCategories);
+
+    if (categoriesError) {
+      toast.error("Error adding categories");
     } else {
       toast.success("Post created successfully!");
       navigate("/");
@@ -115,20 +135,32 @@ const CreatePost = () => {
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="category">Category</Label>
-                <Select value={categoryId} onValueChange={setCategoryId} required>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map((category) => (
-                      <SelectItem key={category.id} value={category.id}>
-                        {category.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div className="space-y-3">
+                <Label>Categories (select at least one)</Label>
+                <div className="grid grid-cols-2 gap-3">
+                  {categories.map((category) => (
+                    <label
+                      key={category.id}
+                      className="flex items-center space-x-2 cursor-pointer p-3 rounded-lg border border-border hover:bg-accent/50 transition-colors"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedCategories.includes(category.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedCategories([...selectedCategories, category.id]);
+                          } else {
+                            setSelectedCategories(
+                              selectedCategories.filter((id) => id !== category.id)
+                            );
+                          }
+                        }}
+                        className="w-4 h-4 text-primary border-border rounded focus:ring-2 focus:ring-primary"
+                      />
+                      <span className="text-sm font-medium">{category.name}</span>
+                    </label>
+                  ))}
+                </div>
               </div>
 
               <div className="space-y-2">

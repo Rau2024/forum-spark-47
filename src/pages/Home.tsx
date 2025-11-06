@@ -60,14 +60,24 @@ const Home = () => {
       .select(`
         *,
         profiles(username),
-        categories(name, color),
         post_likes(is_like),
         comments(id)
       `)
       .order("created_at", { ascending: false });
 
     if (selectedCategory) {
-      query = query.eq("category_id", selectedCategory);
+      // Filter by posts that have this category
+      const { data: postIds } = await supabase
+        .from("post_categories")
+        .select("post_id")
+        .eq("category_id", selectedCategory);
+      
+      if (postIds && postIds.length > 0) {
+        query = query.in("id", postIds.map((pc) => pc.post_id));
+      } else {
+        setPosts([]);
+        return;
+      }
     }
 
     if (selectedFilter === "my-posts" && user) {
@@ -91,9 +101,25 @@ const Home = () => {
 
     if (error) {
       toast.error("Error loading posts");
-    } else {
-      setPosts(data || []);
+      return;
     }
+
+    // Fetch categories for each post
+    const postsWithCategories = await Promise.all(
+      (data || []).map(async (post) => {
+        const { data: postCats } = await supabase
+          .from("post_categories")
+          .select("category_id, categories(name, color)")
+          .eq("post_id", post.id);
+
+        return {
+          ...post,
+          categories: postCats?.map((pc: any) => pc.categories) || [],
+        };
+      })
+    );
+
+    setPosts(postsWithCategories);
   };
 
   const fetchUserLikes = async () => {

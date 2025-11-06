@@ -14,10 +14,10 @@ interface PostCardProps {
     profiles: {
       username: string;
     };
-    categories: {
+    categories: Array<{
       name: string;
       color: string;
-    } | null;
+    }>;
     post_likes: Array<{ is_like: boolean }>;
     comments: Array<{ id: string }>;
   };
@@ -43,10 +43,14 @@ const PostCard = ({ post, onLike, userLike }: PostCardProps) => {
                 {post.content}
               </p>
             </div>
-            {post.categories && (
-              <Badge style={{ backgroundColor: post.categories.color }}>
-                {post.categories.name}
-              </Badge>
+            {post.categories && post.categories.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {post.categories.map((category, index) => (
+                  <Badge key={index} style={{ backgroundColor: category.color }}>
+                    {category.name}
+                  </Badge>
+                ))}
+              </div>
             )}
           </div>
 

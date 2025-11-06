@@ -60,7 +60,6 @@ const PostDetail = () => {
       .select(`
         *,
         profiles(username),
-        categories(name, color),
         post_likes(is_like)
       `)
       .eq("id", id)
@@ -69,9 +68,19 @@ const PostDetail = () => {
     if (error) {
       toast.error("Error loading post");
       navigate("/");
-    } else {
-      setPost(data);
+      return;
     }
+
+    // Fetch categories for this post
+    const { data: postCats } = await supabase
+      .from("post_categories")
+      .select("category_id, categories(name, color)")
+      .eq("post_id", id);
+
+    setPost({
+      ...data,
+      categories: postCats?.map((pc: any) => pc.categories) || [],
+    });
   };
 
   const fetchComments = async () => {
@@ -227,10 +236,14 @@ const PostDetail = () => {
                   <span>{formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}</span>
                 </div>
               </div>
-              {post.categories && (
-                <Badge style={{ backgroundColor: post.categories.color }}>
-                  {post.categories.name}
-                </Badge>
+              {post.categories && post.categories.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {post.categories.map((category: any, index: number) => (
+                    <Badge key={index} style={{ backgroundColor: category.color }}>
+                      {category.name}
+                    </Badge>
+                  ))}
+                </div>
               )}
             </div>
           </CardHeader>

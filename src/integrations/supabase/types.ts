@@ -119,6 +119,42 @@ export type Database = {
           },
         ]
       }
+      post_categories: {
+        Row: {
+          category_id: string
+          created_at: string
+          id: string
+          post_id: string
+        }
+        Insert: {
+          category_id: string
+          created_at?: string
+          id?: string
+          post_id: string
+        }
+        Update: {
+          category_id?: string
+          created_at?: string
+          id?: string
+          post_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_categories_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_categories_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       post_likes: {
         Row: {
           created_at: string
@@ -161,7 +197,6 @@ export type Database = {
       posts: {
         Row: {
           author_id: string
-          category_id: string | null
           content: string
           created_at: string
           id: string
@@ -170,7 +205,6 @@ export type Database = {
         }
         Insert: {
           author_id: string
-          category_id?: string | null
           content: string
           created_at?: string
           id?: string
@@ -179,7 +213,6 @@ export type Database = {
         }
         Update: {
           author_id?: string
-          category_id?: string | null
           content?: string
           created_at?: string
           id?: string
@@ -192,13 +225,6 @@ export type Database = {
             columns: ["author_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "posts_category_id_fkey"
-            columns: ["category_id"]
-            isOneToOne: false
-            referencedRelation: "categories"
             referencedColumns: ["id"]
           },
         ]
