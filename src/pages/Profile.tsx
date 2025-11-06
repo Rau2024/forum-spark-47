@@ -8,6 +8,18 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { z } from "zod";
+
+const profileSchema = z.object({
+  username: z.string()
+    .trim()
+    .min(3, "Username must be at least 3 characters")
+    .max(30, "Username must be less than 30 characters")
+    .regex(/^[a-zA-Z0-9_-]+$/, "Username can only contain letters, numbers, underscores, and hyphens"),
+  bio: z.string()
+    .trim()
+    .max(500, "Bio must be less than 500 characters")
+});
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -62,19 +74,33 @@ const Profile = () => {
     e.preventDefault();
     setLoading(true);
 
-    const { error } = await supabase
-      .from("profiles")
-      .update({
-        username,
-        bio,
-      })
-      .eq("id", user.id);
+    try {
+      const validationResult = profileSchema.safeParse({ username, bio });
+      
+      if (!validationResult.success) {
+        const errors = validationResult.error.errors.map(err => err.message).join(", ");
+        toast.error(errors);
+        setLoading(false);
+        return;
+      }
 
-    if (error) {
-      toast.error("Error updating profile");
-    } else {
-      toast.success("Profile updated successfully!");
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          username: validationResult.data.username,
+          bio: validationResult.data.bio,
+        })
+        .eq("id", user.id);
+
+      if (error) {
+        toast.error("Error updating profile");
+      } else {
+        toast.success("Profile updated successfully!");
+      }
+    } catch (error) {
+      toast.error("An unexpected error occurred");
     }
+    
     setLoading(false);
   };
 
