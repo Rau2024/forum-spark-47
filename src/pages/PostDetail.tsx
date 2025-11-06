@@ -230,7 +230,7 @@ const PostDetail = () => {
           <CardHeader>
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
-                <h1 className="text-3xl font-bold mb-4">{post.title}</h1>
+                <h1 className="text-3xl font-bold mb-4 break-words">{post.title}</h1>
                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
                   <span>by {post.profiles.username}</span>
                   <span>{formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}</span>
@@ -248,7 +248,7 @@ const PostDetail = () => {
             </div>
           </CardHeader>
           <CardContent>
-            <p className="text-base whitespace-pre-wrap mb-6">{post.content}</p>
+            <p className="text-base whitespace-pre-wrap mb-6 break-words">{post.content}</p>
 
             <div className="flex items-center gap-2 pt-4 border-t">
               <Button
