@@ -36,10 +36,10 @@ const PostCard = ({ post, onLike, userLike }: PostCardProps) => {
         <div className="space-y-3">
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 space-y-1">
-              <h3 className="text-lg font-semibold hover:text-primary transition-colors">
+              <h3 className="text-lg font-semibold hover:text-primary transition-colors break-words">
                 {post.title}
               </h3>
-              <p className="text-sm text-muted-foreground line-clamp-2">
+              <p className="text-sm text-muted-foreground line-clamp-2 break-words">
                 {post.content}
               </p>
             </div>
