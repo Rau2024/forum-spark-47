@@ -226,11 +226,11 @@ const PostDetail = () => {
           Back to posts
         </Button>
 
-        <Card className="mb-6 overflow-hidden">
+        <Card className="mb-6">
           <CardHeader>
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
-                <h1 className="text-3xl font-bold mb-4 break-words">{post.title}</h1>
+                <h1 className="text-3xl font-bold mb-4 break-words overflow-wrap-anywhere">{post.title}</h1>
                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
                   <span>by {post.profiles.username}</span>
                   <span>{formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}</span>
