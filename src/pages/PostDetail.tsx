@@ -226,7 +226,7 @@ const PostDetail = () => {
           Back to posts
         </Button>
 
-        <Card className="mb-6">
+        <Card className="mb-6 overflow-hidden">
           <CardHeader>
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
