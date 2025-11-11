@@ -31,7 +31,7 @@ const PostCard = ({ post, onLike, userLike }: PostCardProps) => {
   const commentCount = post.comments.length;
 
   return (
-    <Card className="p-4 hover:shadow-md transition-shadow">
+    <Card className="p-4 hover:shadow-md transition-shadow overflow-hidden">
       <Link to={`/post/${post.id}`}>
         <div className="space-y-3">
           <div className="flex items-start justify-between gap-4">
